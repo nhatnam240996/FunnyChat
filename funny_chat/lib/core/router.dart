@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:funny_chat/ui/chat.dart';
+import 'package:funny_chat/ui/contact.dart';
+import 'package:funny_chat/ui/empty_page.dart';
 import 'package:funny_chat/ui/home_page.dart';
 import 'package:funny_chat/ui/init_view_state.dart';
 import 'package:funny_chat/ui/login.dart';
@@ -13,7 +16,7 @@ class Router {
         return MaterialPageRoute(
           builder: (_) => InitViewState(),
         );
-      case '/home':
+      case '/home-page':
         return MaterialPageRoute(
           builder: (_) => HomePage(),
         );
@@ -24,6 +27,18 @@ class Router {
       case '/sign-in':
         return MaterialPageRoute(
           builder: (_) => SignIn(),
+        );
+      case '/search-contact':
+        return MaterialPageRoute(
+          builder: (_) => Contact(),
+        );
+      case '/chat':
+        return MaterialPageRoute(
+          builder: (_) => Chat(),
+        );
+      default:
+        return MaterialPageRoute(
+          builder: (_) => EmptyPage(),
         );
     }
   }

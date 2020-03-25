@@ -1,3 +1,3 @@
 class GlobalConfig {
-  static String get realDomain => "https://716bbc15.ngrok.io";
+  static String get realDomain => "https://express-server-chat.herokuapp.com";
 }
