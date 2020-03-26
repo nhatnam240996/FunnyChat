@@ -4,7 +4,10 @@ import 'package:funny_chat/core/responsitory/api.dart';
 import 'package:funny_chat/core/storage_manager.dart';
 import 'package:funny_chat/ui/chat_home.dart';
 import 'package:funny_chat/ui/contact.dart';
+import 'package:funny_chat/ui/theme/theme_manager.dart';
 import 'dart:math' as math;
+
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -63,7 +66,10 @@ class _HomePageState extends State<HomePage> {
                         Icons.brightness_2,
                         color: Colors.white,
                       ),
-                      onPressed: () {},
+                      onPressed: () async {
+                        Provider.of<ThemeManager>(context, listen: false)
+                            .changeTheme();
+                      },
                     ),
                   ),
                 ],

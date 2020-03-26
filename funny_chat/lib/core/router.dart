@@ -34,7 +34,7 @@ class Router {
         );
       case '/chat':
         return MaterialPageRoute(
-          builder: (_) => Chat(),
+          builder: (_) => Chat(data),
         );
       default:
         return MaterialPageRoute(

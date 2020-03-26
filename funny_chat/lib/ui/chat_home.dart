@@ -8,24 +8,9 @@ class ChatHome extends StatefulWidget {
 class _ChatHomeState extends State<ChatHome> {
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Scaffold(
       // color: Colors.redAccent,
-      child: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Flexible(
-              child: Container(
-                  decoration: BoxDecoration(color: Colors.yellow),
-                  child: Text(
-                    "hihi",
-                    softWrap: false,
-                    //overflow: TextOverflow.clip,
-                    //textAlign: TextAlign.left,
-                  )),
-            ),
-          ],
-        ),
-      ),
+      body: Container(),
     );
   }
 }

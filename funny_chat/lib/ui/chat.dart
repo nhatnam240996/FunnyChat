@@ -1,8 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:funny_chat/core/models/chat/chat_room.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class Chat extends StatefulWidget {
+  final ChatRoom chatRoom;
+  Chat(this.chatRoom);
   @override
   _ChatState createState() => _ChatState();
 }
@@ -11,28 +13,24 @@ class _ChatState extends State<Chat> {
   bool showUtil = true;
   bool isTyping = false;
   TextEditingController _messageController = TextEditingController();
-  StreamController<String> _streamController;
+  //StreamController<String> _streamController;
   List<String> messages = [];
-
-  void sendMessage(String message) {
-    _streamController.add(message);
-    messages.add(message);
-
-    /// after send message should be clear
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _messageController.clear());
-  }
-
+  IO.Socket socket;
   @override
   void initState() {
-    _streamController = StreamController<String>.broadcast();
+    //_streamController = StreamController<String>.broadcast();
+    socket = IO.io('https://c229e0f8.ngrok.io', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+    socket.connect();
     super.initState();
   }
 
   @override
   void dispose() {
-    _streamController.close();
     _messageController.dispose();
+    socket.disconnect();
     super.dispose();
   }
 
@@ -48,58 +46,68 @@ class _ChatState extends State<Chat> {
           Expanded(
             child: Container(
               margin: EdgeInsets.all(8.0),
-              child: StreamBuilder<String>(
-                  stream: _streamController.stream,
-                  builder: (context, snapshot) {
-                    print(snapshot.data);
-                    return ListView(
-                      reverse: true,
-                      children: messages
-                          .map(
-                            (e) => Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                // Expanded(
-                                //   child: const SizedBox(
-                                //     width: double.infinity,
-                                //   ),
-                                // ),
-                                Flexible(
-                                  fit: FlexFit.tight,
-                                  child: Container(
-                                    alignment: Alignment.centerLeft,
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 8.0,
-                                      vertical: 8.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue[500],
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Text(
-                                      "$e",
-                                      overflow: TextOverflow.clip,
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18.0,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(
-                                  width: 4.0,
-                                ),
-                                CircleAvatar(
-                                  backgroundColor: Colors.grey,
-                                  child: Icon(Icons.person_outline),
-                                ),
-                              ],
-                            ),
-                          )
-                          .toList(),
-                    );
-                  }),
+              child: StreamBuilder(
+                //stream: channel.stream,
+                builder: (context, snapshot) {
+                  print(snapshot.data);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24.0),
+                    child: Text(snapshot.hasData ? '${snapshot.data}' : ''),
+                  );
+                },
+              ),
+              // child: StreamBuilder(
+              //     stream: channel.stream,
+              //     builder: (context, snapshot) {
+              //       print(snapshot.data);
+              //       return ListView(
+              //         reverse: true,
+              //         children: messages
+              //             .map(
+              //               (e) => Padding(
+              //                 padding: const EdgeInsets.only(top: 4.0),
+              //                 child: Row(
+              //                   mainAxisAlignment: MainAxisAlignment.end,
+              //                   children: <Widget>[
+              //                     const SizedBox(
+              //                       width: 64.0,
+              //                     ),
+              //                     Flexible(
+              //                       child: Container(
+              //                         padding: EdgeInsets.symmetric(
+              //                           horizontal: 8.0,
+              //                           vertical: 8.0,
+              //                         ),
+              //                         decoration: BoxDecoration(
+              //                           color: Colors.blue[500],
+              //                           borderRadius:
+              //                               BorderRadius.circular(15.0),
+              //                         ),
+              //                         child: Text(
+              //                           "$e",
+              //                           overflow: TextOverflow.clip,
+              //                           textAlign: TextAlign.left,
+              //                           style: TextStyle(
+              //                             color: Colors.white,
+              //                             fontSize: 18.0,
+              //                           ),
+              //                         ),
+              //                       ),
+              //                     ),
+              //                     const SizedBox(
+              //                       width: 4.0,
+              //                     ),
+              //                     CircleAvatar(
+              //                       backgroundColor: Colors.grey,
+              //                       child: Icon(Icons.person_outline),
+              //                     ),
+              //                   ],
+              //                 ),
+              //               ),
+              //             )
+              //             .toList(),
+              //       );
+              //     }),
             ),
           ),
 
@@ -163,7 +171,11 @@ class _ChatState extends State<Chat> {
                               ? Icon(Icons.send)
                               : Icon(Icons.tag_faces),
                           onPressed: () {
-                            sendMessage(_messageController.text);
+                            if (_messageController.text.isNotEmpty) {
+                              // channel.sink.add(_messageController.text);
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                  (_) => _messageController.clear());
+                            }
                           },
                         ),
                         border: OutlineInputBorder(

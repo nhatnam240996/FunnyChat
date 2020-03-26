@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/global_config.dart';
 import 'package:funny_chat/core/models/account/user.dart';
+import 'package:funny_chat/core/models/chat/chat_room.dart';
 import 'package:funny_chat/core/storage_manager.dart';
 import 'package:funny_chat/ui/home_page.dart';
 import 'package:http/http.dart' as http;
@@ -100,20 +101,25 @@ class Api {
     }
   }
 
-  /// Chat future
   static createChatRoom(Map map) async {
     try {
-      final response = await http.post(GlobalConfig.realDomain + "/");
+      final response =
+          await http.post(GlobalConfig.realDomain + "/rooms/create", body: map);
       final result = jsonDecode(response.body);
-      if (result["message"] == "success") {
-        return;
+      print(result);
+      if (result["status"] == "success") {
+        final chatRoom = ChatRoom.fromJson(result["message"]);
+        return chatRoom;
       } else {
-        return;
+        return "Something Wrong!";
       }
     } catch (e) {}
   }
 
-  static sentMessage(Map data) async {
-    try {} catch (e) {}
-  }
+  // static sentMessage(Map data) async {
+  //   try {
+  //     final reponse = await
+
+  //   } catch (e) {}
+  // }
 }

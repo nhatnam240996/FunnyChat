@@ -32,7 +32,6 @@ class _SignInState extends State<SignIn> {
       body: Stack(
         children: <Widget>[
           Container(
-            color: Colors.white,
             padding: const EdgeInsets.all(30.0),
             child: Center(
               child: SingleChildScrollView(
