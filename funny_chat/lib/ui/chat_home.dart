@@ -8,9 +8,6 @@ class ChatHome extends StatefulWidget {
 class _ChatHomeState extends State<ChatHome> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // color: Colors.redAccent,
-      body: Container(),
-    );
+    return Container();
   }
 }

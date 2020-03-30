@@ -80,7 +80,11 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.perm_identity),
+                leading: const Icon(Icons.lock_outline),
+                title: const Text('Secret Chat'),
+              ),
+              ListTile(
+                leading: Icon(Icons.person_add),
                 title: Text("Contact".toUpperCase()),
                 onTap: () {
                   Navigator.of(context).pop();
@@ -90,12 +94,24 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.group_add),
+                title: const Text("Add group"),
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text("Setting"),
+              ),
+              ListTile(
                 leading: const Icon(Icons.eject),
                 title: const Text("Log out"),
                 onTap: () async {
                   await Api.logout();
                   Navigator.pushNamed(context, "/log-in");
                 },
+              ),
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: const Text("About FChat"),
               ),
             ],
           ),

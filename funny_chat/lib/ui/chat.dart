@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:funny_chat/core/models/chat/chat_room.dart';
+import 'package:funny_chat/core/global_config.dart';
+import 'package:funny_chat/core/models/account/user.dart';
+import 'package:funny_chat/core/models/chat/join.dart';
+import 'package:funny_chat/core/models/chat/message.dart';
+import 'package:funny_chat/core/storage_manager.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class Chat extends StatefulWidget {
-  final ChatRoom chatRoom;
-  Chat(this.chatRoom);
+  final Map data;
+  Chat(this.data);
   @override
   _ChatState createState() => _ChatState();
 }
@@ -13,18 +17,33 @@ class _ChatState extends State<Chat> {
   bool showUtil = true;
   bool isTyping = false;
   TextEditingController _messageController = TextEditingController();
-  //StreamController<String> _streamController;
+  ScrollController _scrollController = ScrollController();
+  User user;
   List<String> messages = [];
   IO.Socket socket;
   @override
   void initState() {
     //_streamController = StreamController<String>.broadcast();
-    socket = IO.io('https://c229e0f8.ngrok.io', <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-    socket.connect();
+
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    /// Get user from local
+    WidgetsBinding.instance.addPostFrameCallback((callback) async {
+      final bool hasUser = await StorageManager.checkHasKey("user");
+      if (hasUser) {
+        final currentUser = await StorageManager.getObjectByKey("user");
+        setState(() {
+          this.user = User.fromJson(currentUser);
+        });
+      } else {
+        print('Something Wrong');
+      }
+    });
   }
 
   @override
@@ -46,68 +65,52 @@ class _ChatState extends State<Chat> {
           Expanded(
             child: Container(
               margin: EdgeInsets.all(8.0),
-              child: StreamBuilder(
-                //stream: channel.stream,
-                builder: (context, snapshot) {
-                  print(snapshot.data);
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24.0),
-                    child: Text(snapshot.hasData ? '${snapshot.data}' : ''),
-                  );
-                },
+              child: ListView(
+                reverse: true,
+                children: messages
+                    .map(
+                      (e) => Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            const SizedBox(
+                              width: 64.0,
+                            ),
+                            Flexible(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                  vertical: 8.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[500],
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                child: Text(
+                                  "$e",
+                                  overflow: TextOverflow.clip,
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 4.0,
+                            ),
+                            CircleAvatar(
+                              backgroundColor: Colors.grey,
+                              child: Icon(Icons.person_outline),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
-              // child: StreamBuilder(
-              //     stream: channel.stream,
-              //     builder: (context, snapshot) {
-              //       print(snapshot.data);
-              //       return ListView(
-              //         reverse: true,
-              //         children: messages
-              //             .map(
-              //               (e) => Padding(
-              //                 padding: const EdgeInsets.only(top: 4.0),
-              //                 child: Row(
-              //                   mainAxisAlignment: MainAxisAlignment.end,
-              //                   children: <Widget>[
-              //                     const SizedBox(
-              //                       width: 64.0,
-              //                     ),
-              //                     Flexible(
-              //                       child: Container(
-              //                         padding: EdgeInsets.symmetric(
-              //                           horizontal: 8.0,
-              //                           vertical: 8.0,
-              //                         ),
-              //                         decoration: BoxDecoration(
-              //                           color: Colors.blue[500],
-              //                           borderRadius:
-              //                               BorderRadius.circular(15.0),
-              //                         ),
-              //                         child: Text(
-              //                           "$e",
-              //                           overflow: TextOverflow.clip,
-              //                           textAlign: TextAlign.left,
-              //                           style: TextStyle(
-              //                             color: Colors.white,
-              //                             fontSize: 18.0,
-              //                           ),
-              //                         ),
-              //                       ),
-              //                     ),
-              //                     const SizedBox(
-              //                       width: 4.0,
-              //                     ),
-              //                     CircleAvatar(
-              //                       backgroundColor: Colors.grey,
-              //                       child: Icon(Icons.person_outline),
-              //                     ),
-              //                   ],
-              //                 ),
-              //               ),
-              //             )
-              //             .toList(),
-              //       );
-              //     }),
             ),
           ),
 
@@ -172,7 +175,41 @@ class _ChatState extends State<Chat> {
                               : Icon(Icons.tag_faces),
                           onPressed: () {
                             if (_messageController.text.isNotEmpty) {
-                              // channel.sink.add(_messageController.text);
+                              socket = IO.io(
+                                  GlobalConfig.realDomain, <String, dynamic>{
+                                'transports': ['websocket'],
+                                'autoConnect': false,
+                              });
+
+                              socket.io.options['extraHeaders'] = {
+                                'Content-type': 'application/json',
+                                'Accept': 'application/json'
+                              };
+                              socket.connect();
+                              // final messenger = Message(widget.data["roomId"],
+                              //     user.id, _messageController.text);
+
+                              final join = Join(
+                                widget.data["roomId"],
+                                UserInf(
+                                  user.id,
+                                  user.name,
+                                ),
+                              ).toJson();
+                              socket.emitWithAck("join", join, ack: (onValue) {
+                                print(onValue);
+                              });
+
+                              /// send message
+
+                              socket.once("messenger", (value) {
+                                print(value);
+                              });
+
+                              socket.on("${widget.data["roomId"]}", (onValue) {
+                                print(onValue);
+                              });
+
                               WidgetsBinding.instance.addPostFrameCallback(
                                   (_) => _messageController.clear());
                             }

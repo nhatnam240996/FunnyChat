@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Popup {
-  static processingDialog(context, AsyncCallback callback()) async {
+  static processingDialog(context, Future callback) async {
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -21,7 +20,9 @@ class Popup {
     ).timeout(
       (Duration(milliseconds: 300)),
       onTimeout: () async {
-        callback();
+        final result = await callback;
+        Navigator.pop(context);
+        return result;
       },
     );
   }

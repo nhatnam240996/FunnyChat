@@ -32,12 +32,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    final provider =
-        Provider.of<ThemeManager>(context, listen: false).darkTheme;
-    return MaterialApp(
-      onGenerateRoute: Router.generateRoute,
-      home: Login(),
-      theme: provider ? builDarkTheme() : buildLightTheme(),
+    return Consumer<ThemeManager>(
+      builder: (context, provider, child) {
+        return MaterialApp(
+          onGenerateRoute: Router.generateRoute,
+          home: HomePage(),
+          theme: provider.darkTheme ? builDarkTheme() : buildLightTheme(),
+        );
+      },
     );
   }
 }

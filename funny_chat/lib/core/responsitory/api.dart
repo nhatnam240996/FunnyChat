@@ -1,17 +1,16 @@
 import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/global_config.dart';
 import 'package:funny_chat/core/models/account/user.dart';
-import 'package:funny_chat/core/models/chat/chat_room.dart';
 import 'package:funny_chat/core/storage_manager.dart';
-import 'package:funny_chat/ui/home_page.dart';
 import 'package:http/http.dart' as http;
 
 class Api {
-  final _headers = {'Content-Type': 'application/json'};
+  static const headers = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json'
+  };
 
   /// sign in
   static Future signIn(name, String email, String password) async {
@@ -101,19 +100,40 @@ class Api {
     }
   }
 
-  static createChatRoom(Map map) async {
+  // static createChatRoom(Map<String, dynamic> map) async {
+  //   print(json.encode(map));
+  //   try {
+  //     final response = await http.post(
+  //       GlobalConfig.realDomain + "/rooms/create",
+  //       body: json.encode(map),
+  //       headers: headers,
+  //     );
+  //     print(response.body);
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
+
+  static createChatRoom(Map<String, dynamic> data) async {
     try {
-      final response =
-          await http.post(GlobalConfig.realDomain + "/rooms/create", body: map);
+      final response = await http
+          .post(
+            GlobalConfig.realDomain + "/rooms/rooms-for-two-user",
+            headers: headers,
+            body: jsonEncode(data),
+          )
+          .timeout(Duration(seconds: 10));
+      print(response.body);
       final result = jsonDecode(response.body);
-      print(result);
       if (result["status"] == "success") {
-        final chatRoom = ChatRoom.fromJson(result["message"]);
-        return chatRoom;
+        return result["message"]["_id"];
       } else {
-        return "Something Wrong!";
+        return null;
       }
-    } catch (e) {}
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 
   // static sentMessage(Map data) async {

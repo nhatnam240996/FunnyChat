@@ -1,16 +1,18 @@
 class ChatRoom {
-  String name;
-  String id;
-  ChatRoom(this.name, this.id);
+  String fromId;
+  String toId;
+  int roomType;
+  ChatRoom(this.fromId, this.toId);
 
   ChatRoom.fromJson(Map<String, dynamic> map) {
-    this.name = map["name"];
-    this.id = map["_id"];
+    this.fromId = map["from"];
+    this.toId = map["to"];
   }
 
   toJson() {
-    final Map data = Map<String, dynamic>();
-    data["name"] = this.name;
-    data["uid"] = this.id;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data["from"] = this.fromId;
+    data["to"] = this.toId;
+    return data;
   }
 }

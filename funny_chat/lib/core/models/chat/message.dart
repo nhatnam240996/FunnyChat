@@ -1,29 +1,21 @@
-import 'package:funny_chat/core/models/account/user.dart';
-
 class Message {
-  String content;
-  User fromUser;
-  User toUser;
-  String typeContent;
-  int timetamp;
+  String roomId;
+  String userId;
+  String messenger;
 
-  Message(this.content, this.fromUser, this.toUser, this.typeContent,
-      this.timetamp);
+  Message(this.roomId, this.userId, this.messenger);
 
   Message.fromJson(Map<String, dynamic> map) {
-    this.content = map["content"];
-    this.fromUser = map["fromUser"];
-    this.toUser = map["toUser"];
-    this.typeContent = map["typeContent"];
-    this.timetamp = map["timetamp"];
+    this.roomId = map['roomId'];
+    this.userId = map["userId"];
+    this.messenger = map["messenger"];
   }
 
   toJson() {
     final Map data = Map<String, dynamic>();
-    data["content"] = this.content;
-    data["fromUser"] = this.fromUser;
-    data["toUser"] = this.toUser;
-    data["typeContent"] = this.typeContent;
-    data["timetamp"] = this.timetamp;
+    data["roomId"] = this.roomId;
+    data["userId"] = this.userId;
+    data["messenger"] = this.messenger;
+    return data;
   }
 }
