@@ -42,7 +42,15 @@ class _ContactState extends State<Contact> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
+              suffix: IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  WidgetsBinding.instance
+                      .addPostFrameCallback((_) => _searchController.clear());
+                },
+              ),
               hintText: "Search contacts",
+              contentPadding: EdgeInsets.only(left: 16.0),
             ),
             onSubmitted: (value) async {
               setState(
@@ -64,14 +72,22 @@ class _ContactState extends State<Contact> {
               );
             },
           ),
-          Expanded(
-              child: Container(
+          const SizedBox(
+            height: 16.0,
+          ),
+          Container(
             child: contact == null
                 ? Center(
                     child: Text("No contacts yet"),
                   )
                 : ListTile(
-                    leading: CircleAvatar(),
+                    leading: Container(
+                      width: kToolbarHeight,
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     title: Text(contact.name),
                     subtitle: Text(contact.email),
                     onTap: () async {
@@ -79,8 +95,6 @@ class _ContactState extends State<Contact> {
                         user.id,
                         contact.id,
                       ).toJson();
-                      print(chatRoom);
-
                       final result = await Api.createChatRoom(chatRoom);
                       if (result != null) {
                         Navigator.pushNamed(context, "/chat",
@@ -90,41 +104,7 @@ class _ContactState extends State<Contact> {
                       }
                     },
                   ),
-          )),
-
-          // FutureBuilder(
-          //     future: contact,
-          //     builder: (context, AsyncSnapshot<User> snapshot) {
-          //       if (snapshot.hasData && snapshot.data.id != user.id) {
-          //         return Container(
-          //           child: ListTile(
-          //             leading: CircleAvatar(),
-          //             title: Text(snapshot.data.name),
-          //             subtitle: Text(snapshot.data.email),
-          //             onTap: () async {
-          //               final chatRoom = ChatRoom(
-          //                 user.id,
-          //                 snapshot.data.id,
-          //               ).toJson();
-          //               print(chatRoom);
-
-          //               final result = await Api.createChatRoom(chatRoom);
-          //               if (result != null) {
-          //                 Navigator.pushNamed(context, "/chat",
-          //                     arguments: {"roomId": result});
-          //               } else {
-          //                 print("Somthing wrong");
-          //               }
-          //             },
-          //           ),
-
-          //         );
-          //       } else {
-          //         return Center(
-          //           child: Text("No contacts yet"),
-          //         );
-          //       }
-          //     })
+          ),
         ],
       ),
     );

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/models/account/user.dart';
+import 'package:funny_chat/ui/contact.dart';
 import 'package:funny_chat/core/responsitory/api.dart';
 import 'package:funny_chat/core/storage_manager.dart';
-import 'package:funny_chat/ui/chat_home.dart';
-import 'package:funny_chat/ui/contact.dart';
 import 'package:funny_chat/ui/theme/theme_manager.dart';
-import 'dart:math' as math;
-
 import 'package:provider/provider.dart';
+import 'dart:math' as math;
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,6 +17,29 @@ class _HomePageState extends State<HomePage> {
   PageController _pageController = PageController();
 
   @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        children: <Widget>[
+          ChatHome(),
+          Contact(),
+        ],
+      ),
+    );
+  }
+}
+
+class ChatHome extends StatefulWidget {
+  @override
+  _ChatHomeState createState() => _ChatHomeState();
+}
+
+class _ChatHomeState extends State<ChatHome> {
+  User user;
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((callback) async {
@@ -28,12 +49,11 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           this.user = User.fromJson(currentUser);
         });
-      } else {
-        //Navigator.popUntil(context, ModalRoute.withName('/log-in'));
-      }
+      } else {}
     });
   }
 
+  final List<String> friends = ["Nam", "Bình", "Tính", "Lĩnh", "Nhơn", "Hùng"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,13 +64,7 @@ class _HomePageState extends State<HomePage> {
             hintText: "Search",
           ),
           readOnly: true,
-          onTap: () {
-            // showSearch(context: context, delegate: CustomSearch());
-          },
         ),
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.search), onPressed: () {}),
-        ],
       ),
       drawer: Drawer(
         child: SingleChildScrollView(
@@ -88,9 +102,9 @@ class _HomePageState extends State<HomePage> {
                 title: Text("Contact".toUpperCase()),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _pageController.nextPage(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeIn);
+                  // _pageController.nextPage(
+                  //     duration: Duration(milliseconds: 300),
+                  //     curve: Curves.easeIn);
                 },
               ),
               ListTile(
@@ -117,17 +131,66 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: Container(
-          child: SafeArea(
-        child: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _pageController,
-          children: <Widget>[
-            ChatHome(),
-            Contact(),
-          ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Future.delayed(Duration(seconds: 1), () {
+            /// TODO
+          });
+        },
+        child: Container(
+          child: ListView(
+            children: friends
+                .map(
+                  (e) => Dismissible(
+                    key: Key("$e"),
+                    child: ListTile(
+                      onTap: () {},
+                      leading: Container(
+                        width: kToolbarHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      title: Text("$e"),
+                      subtitle: Text("How are you?"),
+                      trailing: Text("9h45'"),
+                    ),
+                    background: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      color: Colors.blue,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Icon(
+                            Icons.notifications,
+                          ),
+                        ],
+                      ),
+                    ),
+                    secondaryBackground: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      color: Colors.red,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Icon(
+                            Icons.delete,
+                            color: Colors.black,
+                          ),
+                        ],
+                      ),
+                    ),
+                    confirmDismiss: (direction) async {
+                      if (direction == DismissDirection.endToStart) {}
+                      return false;
+                    },
+                  ),
+                )
+                .toList(),
+          ),
         ),
-      )),
+      ),
     );
   }
 }

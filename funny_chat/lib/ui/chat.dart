@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:funny_chat/core/global_config.dart';
 import 'package:funny_chat/core/models/account/user.dart';
 import 'package:funny_chat/core/models/chat/join.dart';
-import 'package:funny_chat/core/models/chat/message.dart';
 import 'package:funny_chat/core/storage_manager.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
