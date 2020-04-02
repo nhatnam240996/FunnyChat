@@ -28,10 +28,6 @@ class Router {
         return MaterialPageRoute(
           builder: (_) => SignIn(),
         );
-      case '/search-contact':
-        return MaterialPageRoute(
-          builder: (_) => Contact(),
-        );
       case '/chat':
         return MaterialPageRoute(
           builder: (_) => Chat(data),

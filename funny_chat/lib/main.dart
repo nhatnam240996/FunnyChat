@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/router.dart';
+import 'package:funny_chat/core/view_model/home_page_viewmodel.dart';
 import 'package:funny_chat/core/view_model/login_view_model.dart';
 import 'package:funny_chat/ui/home_page.dart';
 import 'package:funny_chat/ui/login.dart';
@@ -16,6 +17,9 @@ class App extends StatelessWidget {
     return MultiProvider(providers: [
       ChangeNotifierProvider(
         create: (_) => LoginViewModel(),
+      ),
+      ChangeNotifierProvider(
+        create: (_) => HomePageViewModel(),
       ),
       ChangeNotifierProvider(
         create: (_) => ThemeManager(),
@@ -35,8 +39,9 @@ class _MyAppState extends State<MyApp> {
     return Consumer<ThemeManager>(
       builder: (context, provider, child) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           onGenerateRoute: Router.generateRoute,
-          home: HomePage(),
+          initialRoute: "/home-page",
           theme: provider.darkTheme ? builDarkTheme() : buildLightTheme(),
         );
       },

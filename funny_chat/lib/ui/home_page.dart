@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/models/account/user.dart';
-import 'package:funny_chat/ui/contact.dart';
+import 'package:funny_chat/core/models/chat/chat_room.dart';
+import 'package:funny_chat/ui/command/Popup.dart';
 import 'package:funny_chat/core/responsitory/api.dart';
 import 'package:funny_chat/core/storage_manager.dart';
+import 'package:funny_chat/ui/notification_page.dart';
 import 'package:funny_chat/ui/theme/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
@@ -13,32 +15,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  User user;
-  PageController _pageController = PageController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        physics: NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        children: <Widget>[
-          ChatHome(),
-          Contact(),
-        ],
-      ),
-    );
-  }
-}
-
-class ChatHome extends StatefulWidget {
-  @override
-  _ChatHomeState createState() => _ChatHomeState();
-}
-
-class _ChatHomeState extends State<ChatHome> {
-  User user;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -53,18 +29,65 @@ class _ChatHomeState extends State<ChatHome> {
     });
   }
 
+  User user;
   final List<String> friends = ["Nam", "Bình", "Tính", "Lĩnh", "Nhơn", "Hùng"];
+  PageController pageController = PageController();
+  TextEditingController _searchController = TextEditingController();
+  User contact;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: pageController,
+          children: [
+            buildHomePageChat(context, pageController),
+            buildContactPage(context, pageController),
+          ]),
+    );
+  }
+
+  Widget buildHomePageChat(
+      BuildContext context, PageController pageController) {
+    return Scaffold(
       appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Search",
+        title: Text("Funny Chat"),
+        actions: <Widget>[
+          // Using Stack to show Notification Badge
+          new Stack(
+            children: <Widget>[
+              new IconButton(
+                  icon: Icon(Icons.notifications),
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => NotificationPage()));
+                  }),
+              Positioned(
+                right: 11,
+                top: 11,
+                child: new Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: new BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 14,
+                    minHeight: 14,
+                  ),
+                  child: Text(
+                    '10',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 8,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            ],
           ),
-          readOnly: true,
-        ),
+        ],
       ),
       drawer: Drawer(
         child: SingleChildScrollView(
@@ -90,7 +113,7 @@ class _ChatHomeState extends State<ChatHome> {
                 accountName: Text(user?.name == null ? "User" : user.name),
                 accountEmail: Text(user?.email == null ? "User" : user.email),
                 onDetailsPressed: () {
-                  //Navigator.pushNamed(context, "/search-contact");
+                  /// TODO
                 },
               ),
               ListTile(
@@ -102,6 +125,9 @@ class _ChatHomeState extends State<ChatHome> {
                 title: Text("Contact".toUpperCase()),
                 onTap: () {
                   Navigator.of(context).pop();
+                  pageController.nextPage(
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeIn);
                   // _pageController.nextPage(
                   //     duration: Duration(milliseconds: 300),
                   //     curve: Curves.easeIn);
@@ -189,6 +215,89 @@ class _ChatHomeState extends State<ChatHome> {
                 )
                 .toList(),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildContactPage(BuildContext context, PageController pageController) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(onPressed: () {
+          pageController.animateToPage(0,
+              duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+        }),
+      ),
+      body: Container(
+        child: Column(
+          children: <Widget>[
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                suffix: IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () {
+                    WidgetsBinding.instance
+                        .addPostFrameCallback((_) => _searchController.clear());
+                  },
+                ),
+                hintText: "Search contacts",
+                contentPadding: EdgeInsets.only(left: 16.0),
+              ),
+              onSubmitted: (value) async {
+                setState(
+                  () {
+                    Popup.processingDialog(
+                        context,
+                        Api.searchContact(value).then((onValue) {
+                          if (onValue.id == user.id) {
+                            setState(() {
+                              contact = null;
+                            });
+                          } else {
+                            setState(() {
+                              contact = onValue;
+                            });
+                          }
+                        }));
+                  },
+                );
+              },
+            ),
+            const SizedBox(
+              height: 16.0,
+            ),
+            Container(
+              child: contact == null
+                  ? Center(
+                      child: Text("No contacts yet"),
+                    )
+                  : ListTile(
+                      leading: Container(
+                        width: kToolbarHeight,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      title: Text(contact.name),
+                      subtitle: Text(contact.email),
+                      onTap: () async {
+                        final chatRoom = ChatRoom(
+                          user.id,
+                          contact.id,
+                        ).toJson();
+                        final result = await Api.createChatRoom(chatRoom);
+                        if (result != null) {
+                          Navigator.pushNamed(context, "/chat",
+                              arguments: {"roomId": result});
+                        } else {
+                          print("Somthing wrong");
+                        }
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );

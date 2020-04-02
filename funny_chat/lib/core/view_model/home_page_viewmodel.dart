@@ -1,22 +1,18 @@
 import 'package:flutter/cupertino.dart';
-import 'package:funny_chat/core/models/account/user.dart';
-import 'package:funny_chat/core/storage_manager.dart';
+import 'package:flutter/foundation.dart';
 
 class HomePageViewModel with ChangeNotifier {
-  User user;
-  String error;
-  bool _validator = false;
-  bool _visiable = true;
+  PageController pageController = PageController(
+    initialPage: 0,
+  );
 
-  HomePageViewModel() {
-    //loadLocalUser();
+  nextPage() {
+    pageController.animateToPage(1,
+        duration: Duration(milliseconds: 300), curve: Curves.easeIn);
   }
 
-  // loadLocalUser() async {
-  //   final currentUser = await StorageManager.getObjectByKey("user");
-  //   print(currentUser);
-  //   this.user = currentUser;
-  // }
-
-  login() {}
+  previousPage() {
+    pageController.animateToPage(0,
+        duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+  }
 }
