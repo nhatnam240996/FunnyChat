@@ -36,6 +36,7 @@ android {
         applicationId "com.example.funny_chat"
         minSdkVersion 16
         targetSdkVersion 28
+        multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -51,4 +52,11 @@ android {
 
 flutter {
     source '../..'
+}
+apply plugin: 'com.google.gms.google-services'
+dependencies {
+  // add the Firebase SDK for Google Analytics
+  implementation 'com.google.firebase:firebase-analytics:17.2.2'
+  // add SDKs for any other desired Firebase products
+  // https://firebase.google.com/docs/android/setup#available-libraries
 }

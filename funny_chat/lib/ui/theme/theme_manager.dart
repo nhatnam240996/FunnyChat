@@ -1,4 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:funny_chat/core/storage_manager.dart';
+import 'package:provider/provider.dart';
 
 ThemeData builDarkTheme() {
   final ThemeData basic = ThemeData.dark();
@@ -21,9 +25,22 @@ class ThemeManager with ChangeNotifier {
   bool _darkTheme = false;
   bool get darkTheme => _darkTheme;
 
-  changeTheme() {
-    print(_darkTheme);
-    _darkTheme = !_darkTheme;
+  changeTheme(bool theme) {
+    this._darkTheme = theme;
     notifyListeners();
+  }
+
+  static loadThemeConfig(BuildContext context) async {
+    /// check has key before load data
+    bool checkLocalConfig = await StorageManager.checkHasKey("darkTheme");
+
+    /// load theme data
+    if (checkLocalConfig) {
+      final bool darkTheme = await StorageManager.getStorageByKey("darkTheme");
+      log("darkTheme: $darkTheme");
+      if (darkTheme) {
+        Provider.of<ThemeManager>(context, listen: false).changeTheme(true);
+      }
+    }
   }
 }

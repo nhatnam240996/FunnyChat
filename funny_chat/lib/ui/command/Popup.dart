@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Popup {
   static processingDialog(context, Future callback) async {
-    showDialog(
+    return await showDialog(
       barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(

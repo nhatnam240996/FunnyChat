@@ -1,5 +1,3 @@
-import 'package:funny_chat/core/models/account/Token.dart';
-
 class User {
   String id;
   String phone;

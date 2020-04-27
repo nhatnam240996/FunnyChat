@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/global_config.dart';
@@ -131,15 +132,7 @@ class Api {
         return null;
       }
     } catch (e) {
-      print(e);
-      return null;
+      log(e);
     }
   }
-
-  // static sentMessage(Map data) async {
-  //   try {
-  //     final reponse = await
-
-  //   } catch (e) {}
-  // }
 }

@@ -1,6 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/models/account/user.dart';
 import 'package:funny_chat/core/models/chat/chat_room.dart';
+import 'package:funny_chat/core/view_model/home_page_viewmodel.dart';
 import 'package:funny_chat/ui/command/Popup.dart';
 import 'package:funny_chat/core/responsitory/api.dart';
 import 'package:funny_chat/core/storage_manager.dart';
@@ -30,7 +35,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   User user;
-  final List<String> friends = ["Nam", "Bình", "Tính", "Lĩnh", "Nhơn", "Hùng"];
+  final List<String> friends = [
+    "Nam",
+    "Bình",
+  ];
   PageController pageController = PageController();
   TextEditingController _searchController = TextEditingController();
   User contact;
@@ -57,11 +65,12 @@ class _HomePageState extends State<HomePage> {
           new Stack(
             children: <Widget>[
               new IconButton(
-                  icon: Icon(Icons.notifications),
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => NotificationPage()));
-                  }),
+                icon: Icon(Icons.notifications),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => NotificationPage()));
+                },
+              ),
               Positioned(
                 right: 11,
                 top: 11,
@@ -104,8 +113,13 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.white,
                       ),
                       onPressed: () async {
+                        final darkTheme =
+                            Provider.of<ThemeManager>(context, listen: false)
+                                .darkTheme;
+                        await StorageManager.setStorage(
+                            "darkTheme", !darkTheme);
                         Provider.of<ThemeManager>(context, listen: false)
-                            .changeTheme();
+                            .changeTheme(!darkTheme);
                       },
                     ),
                   ),
@@ -245,23 +259,18 @@ class _HomePageState extends State<HomePage> {
                 contentPadding: EdgeInsets.only(left: 16.0),
               ),
               onSubmitted: (value) async {
-                setState(
-                  () {
-                    Popup.processingDialog(
-                        context,
-                        Api.searchContact(value).then((onValue) {
-                          if (onValue.id == user.id) {
-                            setState(() {
-                              contact = null;
-                            });
-                          } else {
-                            setState(() {
-                              contact = onValue;
-                            });
-                          }
-                        }));
-                  },
-                );
+                try {
+                  Firestore.instance
+                      .collectionGroup("users")
+                      .where("email", isEqualTo: value)
+                      .snapshots()
+                      .listen((data) {
+                    var length = data.documents.length;
+                    if (length != null && length > 0) {}
+                  });
+                } catch (e) {
+                  print(e);
+                }
               },
             ),
             const SizedBox(

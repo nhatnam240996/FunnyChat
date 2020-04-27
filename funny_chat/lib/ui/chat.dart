@@ -22,7 +22,7 @@ class _ChatState extends State<Chat> {
   TextEditingController _messageController = TextEditingController();
   StreamController<String> _streamController =
       StreamController<String>.broadcast();
-  ScrollController _scrollController = ScrollController();
+  //ScrollController _scrollController = ScrollController();
   User user;
   List<String> messages = [];
   IO.Socket socket;
@@ -74,19 +74,19 @@ class _ChatState extends State<Chat> {
     });
   }
 
-  getMessage() {
-    socket.on(
-      "messenger",
-      (message) {
-        if (message != null) {
-          print("$message");
-          return "data";
-          // return jsonDecode(message);
-        }
-      },
-    );
-    // _streamController.add(_messageController.text);
-  }
+  // getMessage() {
+  //   socket.on(
+  //     "messenger",
+  //     (message) {
+  //       if (message != null) {
+  //         print("$message");
+  //         return "data";
+  //         // return jsonDecode(message);
+  //       }
+  //     },
+  //   );
+  //   // _streamController.add(_messageController.text);
+  // }
 
   @override
   void dispose() {

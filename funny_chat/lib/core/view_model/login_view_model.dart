@@ -2,10 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/models/account/user.dart';
 import 'package:funny_chat/core/responsitory/api.dart';
+import 'package:funny_chat/core/responsitory/api_firebase.dart';
 
 class LoginViewModel with ChangeNotifier {
+  final Auth _auth;
+
+  LoginViewModel(this._auth);
   String _error = "";
   String get error => _error;
+
+  signInWithFireBase(String email, String password) async {
+    final result = await _auth.signIn(email, password);
+  }
 
   signIn(Map data, BuildContext context) async {
     showDialog(

@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:funny_chat/core/models/account/user.dart';
-import 'package:funny_chat/core/responsitory/api.dart';
-import 'package:funny_chat/core/storage_manager.dart';
-import 'package:funny_chat/ui/home_page.dart';
+import 'package:funny_chat/core/view_model/sign_up_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -16,13 +14,12 @@ class _SignInState extends State<SignIn> {
   final TextEditingController _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _validator = false;
-  Color get colorNormal => const Color(0xFFCCF4F5);
-  String error = "";
+  bool _visibility = true;
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<SignUpViewModel>(context);
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
           "Đăng Kí".toUpperCase(),
@@ -101,6 +98,7 @@ class _SignInState extends State<SignIn> {
                           Expanded(
                             child: TextFormField(
                               controller: _password,
+                              obscureText: _visibility,
                               validator: (value) {
                                 if (value.length < 8) {
                                   return "Mật khẩu phải có ít nhất 8 kí tự";
@@ -109,9 +107,15 @@ class _SignInState extends State<SignIn> {
                               },
                               decoration: InputDecoration(
                                 suffixIcon: FlatButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    setState(() {
+                                      _visibility = !_visibility;
+                                    });
+                                  },
                                   child: Text(
-                                    "show".toUpperCase(),
+                                    _visibility
+                                        ? "show".toUpperCase()
+                                        : "hide".toUpperCase(),
                                   ),
                                 ),
                               ),
@@ -123,10 +127,10 @@ class _SignInState extends State<SignIn> {
                         ],
                       ),
                       const SizedBox(
-                        height: 8.0,
+                        height: 16.0,
                       ),
                       Text(
-                        error,
+                        provider?.error,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.red),
                       ),
@@ -137,55 +141,9 @@ class _SignInState extends State<SignIn> {
                         height: 55.0,
                         child: FlatButton(
                           color: Colors.blueAccent,
-                          onPressed: () async {
-                            if (_formKey.currentState.validate()) {
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0.0,
-                                  title: Container(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 122.0),
-                                    height: 36.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                              ).timeout((Duration(milliseconds: 300)),
-                                  onTimeout: () async {
-                                final user = await Api.signIn(
-                                  _name.text,
-                                  _email.text,
-                                  _password.text,
-                                );
-                                if (user is User) {
-                                  Navigator.pop(context);
-                                  await StorageManager.setObject("user", user);
-
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => HomePage()));
-                                } else {
-                                  setState(() {
-                                    // error = user;
-                                    print(user);
-                                    if (user == null) {
-                                      error =
-                                          "Có lỗi xảy ra vui lòng thử lại sau!";
-                                    } else {
-                                      error = user;
-                                    }
-                                  });
-                                  Navigator.of(context).pop();
-                                }
-                              });
-                              setState(() {
-                                _validator = true;
-                              });
-                            }
+                          onPressed: () {
+                            provider.signUp(
+                                context, _email.text, _password.text);
                           },
                           child: Text(
                             "Sign in".toUpperCase(),
@@ -202,12 +160,6 @@ class _SignInState extends State<SignIn> {
               ),
             ),
           ),
-          // Visibility(
-          //   visible: _isLoading,
-          //   child: Center(
-          //     child: CircularProgressIndicator(),
-          //   ),
-          // ),
         ],
       ),
     );

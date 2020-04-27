@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/ui/chat.dart';
-import 'package:funny_chat/ui/contact.dart';
 import 'package:funny_chat/ui/empty_page.dart';
 import 'package:funny_chat/ui/home_page.dart';
-import 'package:funny_chat/ui/init_view_state.dart';
+import 'package:funny_chat/ui/init_page.dart';
 import 'package:funny_chat/ui/login.dart';
 import 'package:funny_chat/ui/sign_in.dart';
 
