@@ -26,7 +26,7 @@ class _InitViewStateState extends State<InitViewState> {
         Navigator.pushNamed(context, '/home-page');
       });
     } else {
-      Navigator.pushNamed(context, '/log-in');
+      Navigator.pushNamed(context, '/login-page');
     }
     super.didChangeDependencies();
   }

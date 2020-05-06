@@ -1,18 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/models/account/user.dart';
-import 'package:funny_chat/core/models/chat/chat_room.dart';
-import 'package:funny_chat/core/view_model/home_page_viewmodel.dart';
-import 'package:funny_chat/ui/command/Popup.dart';
-import 'package:funny_chat/core/responsitory/api.dart';
 import 'package:funny_chat/core/storage_manager.dart';
-import 'package:funny_chat/ui/notification_page.dart';
 import 'package:funny_chat/ui/theme/theme_manager.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
+import 'package:crypto/crypto.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -34,10 +28,16 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  _loadConversation() {
+    Firestore.instance
+        .collection("conversations")
+        .document("uid1-uid2")
+        .collection('123');
+  }
+
   User user;
   final List<String> friends = [
     "Nam",
-    "Bình",
   ];
   PageController pageController = PageController();
   TextEditingController _searchController = TextEditingController();
@@ -60,43 +60,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Funny Chat"),
-        actions: <Widget>[
-          // Using Stack to show Notification Badge
-          new Stack(
-            children: <Widget>[
-              new IconButton(
-                icon: Icon(Icons.notifications),
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => NotificationPage()));
-                },
-              ),
-              Positioned(
-                right: 11,
-                top: 11,
-                child: new Container(
-                  padding: EdgeInsets.all(2),
-                  decoration: new BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: BoxConstraints(
-                    minWidth: 14,
-                    minHeight: 14,
-                  ),
-                  child: Text(
-                    '10',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ],
       ),
       drawer: Drawer(
         child: SingleChildScrollView(
@@ -125,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ],
                 accountName: Text(user?.name == null ? "User" : user.name),
-                accountEmail: Text(user?.email == null ? "User" : user.email),
+                accountEmail: Text("user"),
                 onDetailsPressed: () {
                   /// TODO
                 },
@@ -159,8 +122,24 @@ class _HomePageState extends State<HomePage> {
                 leading: const Icon(Icons.eject),
                 title: const Text("Log out"),
                 onTap: () async {
-                  await Api.logout();
-                  Navigator.pushNamed(context, "/log-in");
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0.0,
+                      title: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 122.0),
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                        ),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ).timeout(Duration(milliseconds: 100), onTimeout: () async {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/login-page', (Route<dynamic> route) => false);
+                  });
                 },
               ),
               ListTile(
@@ -247,6 +226,14 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             TextField(
               controller: _searchController,
+              maxLength: 10,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.search,
+              onChanged: (onValue) {
+                setState(() {
+                  contact = null;
+                });
+              },
               decoration: InputDecoration(
                 suffix: IconButton(
                   icon: Icon(Icons.close),
@@ -255,18 +242,20 @@ class _HomePageState extends State<HomePage> {
                         .addPostFrameCallback((_) => _searchController.clear());
                   },
                 ),
-                hintText: "Search contacts",
+                hintText: "Search phone number",
                 contentPadding: EdgeInsets.only(left: 16.0),
               ),
               onSubmitted: (value) async {
                 try {
                   Firestore.instance
                       .collectionGroup("users")
-                      .where("email", isEqualTo: value)
+                      .where("phone", isEqualTo: value)
                       .snapshots()
                       .listen((data) {
-                    var length = data.documents.length;
-                    if (length != null && length > 0) {}
+                    print(data.documents[0].data);
+                    setState(() {
+                      contact = User.fromJson(data.documents[0].data);
+                    });
                   });
                 } catch (e) {
                   print(e);
@@ -290,19 +279,13 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       title: Text(contact.name),
-                      subtitle: Text(contact.email),
+                      subtitle: Text("Nhấn để bắt đầu cuộc trò chuyện"),
                       onTap: () async {
-                        final chatRoom = ChatRoom(
-                          user.id,
-                          contact.id,
-                        ).toJson();
-                        final result = await Api.createChatRoom(chatRoom);
-                        if (result != null) {
-                          Navigator.pushNamed(context, "/chat",
-                              arguments: {"roomId": result});
-                        } else {
-                          print("Somthing wrong");
-                        }
+                        Navigator.pushNamed(
+                          context,
+                          "/chat-page",
+                          arguments: contact.toJson(),
+                        );
                       },
                     ),
             ),

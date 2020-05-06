@@ -6,12 +6,25 @@ import 'package:provider/provider.dart';
 
 ThemeData builDarkTheme() {
   final ThemeData basic = ThemeData.dark();
-  return basic.copyWith();
+
+  return basic.copyWith(
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+      },
+    ),
+  );
 }
 
 ThemeData buildLightTheme() {
   final ThemeData basic = ThemeData.light();
-  return basic.copyWith();
+  return basic.copyWith(
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+    }),
+  );
 }
 
 class ThemeManager with ChangeNotifier {

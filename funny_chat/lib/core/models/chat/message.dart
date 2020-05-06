@@ -1,21 +1,26 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Message {
-  String roomId;
-  String userId;
-  String messenger;
+  String fromUid;
+  String toUid;
+  String content;
+  String timetamp;
 
-  Message(this.roomId, this.userId, this.messenger);
+  Message(this.fromUid, this.toUid, this.content, this.timetamp);
 
-  Message.fromJson(Map<String, dynamic> map) {
-    this.roomId = map['roomId'];
-    this.userId = map["userId"];
-    this.messenger = map["messenger"];
+  Message.fromJson(DocumentSnapshot map) {
+    this.fromUid = map['fromUid'];
+    this.toUid = map["toUid"];
+    this.content = map["content"];
+    this.timetamp = map["timetamp"];
   }
 
   toJson() {
     final Map data = Map<String, dynamic>();
-    data["roomId"] = this.roomId;
-    data["userId"] = this.userId;
-    data["messenger"] = this.messenger;
+    data["fromUid"] = this.fromUid;
+    data["toUid"] = this.toUid;
+    data["content"] = this.content;
+    data["timetamp"] = this.timetamp;
     return data;
   }
 }
