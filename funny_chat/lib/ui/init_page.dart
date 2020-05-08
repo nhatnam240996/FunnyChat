@@ -23,7 +23,7 @@ class _InitViewStateState extends State<InitViewState> {
     log("check has User: $checkHasUser");
     if (checkHasUser) {
       Future.delayed(Duration(seconds: 1), () {
-        Navigator.pushNamed(context, '/home-page');
+        Navigator.pushNamed(context, '/conversation-page');
       });
     } else {
       Navigator.pushNamed(context, '/login-page');

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class User {
   String uid;
   String phone;
@@ -6,7 +8,15 @@ class User {
 
   User({this.uid, this.phone, this.name, this.photoUrl});
 
-  factory User.fromJson(Map<String, dynamic> data) {
+  factory User.fromJson(Map<String, dynamic> map) {
+    return User(
+        name: map["name"],
+        phone: map["phone"],
+        photoUrl: map["photoUrl"],
+        uid: map["uid"]);
+  }
+
+  factory User.fromFirebase(DocumentSnapshot data) {
     return User(
         uid: data["uid"],
         name: data["name"],

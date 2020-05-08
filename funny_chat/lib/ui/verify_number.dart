@@ -116,22 +116,22 @@ class _VerifyNumberState extends State<VerifyNumber> {
         );
         await FirebaseAuth.instance
             .signInWithCredential(_authCredential)
-            .then((user) {
+            .then((user) async {
           if (user != null) {
             final User userInf = User(
                 uid: user.user.uid,
                 name: "User-" + RegisterPhoneController.instance.phone,
                 phone: RegisterPhoneController.instance.phone,
                 photoUrl: "");
-            Firestore.instance
+            await Firestore.instance
                 .collection("users")
                 .document("${user.user.uid}")
                 .setData(userInf.toJson());
 
-            StorageManager.setObject("user", userInf.toJson());
+            await StorageManager.setObject("user", userInf.toJson());
 
             Navigator.of(context).pushNamedAndRemoveUntil(
-              '/home-page',
+              '/conversation-page',
               (Route<dynamic> route) => false,
             );
           } else {

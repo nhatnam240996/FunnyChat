@@ -20,6 +20,18 @@ ThemeData builDarkTheme() {
 ThemeData buildLightTheme() {
   final ThemeData basic = ThemeData.light();
   return basic.copyWith(
+    textTheme: TextTheme(
+      subtitle1: TextStyle(
+        color: Colors.black,
+      ),
+      bodyText2: TextStyle(
+        color: Colors.black,
+      ),
+      bodyText1: TextStyle(
+        /// set Colors of ListTile in Drawer
+        color: Colors.black,
+      ),
+    ),
     pageTransitionsTheme: const PageTransitionsTheme(builders: {
       TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
       TargetPlatform.android: CupertinoPageTransitionsBuilder(),
