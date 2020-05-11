@@ -8,6 +8,10 @@ ThemeData builDarkTheme() {
   final ThemeData basic = ThemeData.dark();
 
   return basic.copyWith(
+    iconTheme: IconThemeData(
+      color: Colors.blue,
+    ),
+    scaffoldBackgroundColor: Colors.black,
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
         TargetPlatform.iOS: ZoomPageTransitionsBuilder(),

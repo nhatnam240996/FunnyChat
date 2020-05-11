@@ -34,7 +34,6 @@ dependencies:
   crypto: ^2.0.6
   sembast: ^2.4.3
   camera: ^0.5.7+4
-  flutter_webrtc: ^0.2.8
 
 dev_dependencies:
   flutter_test:

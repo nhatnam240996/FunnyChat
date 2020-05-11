@@ -1,11 +1,16 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:funny_chat/core/models/account/user.dart';
 import 'package:funny_chat/core/models/chat/message.dart';
 import 'package:funny_chat/core/storage_manager.dart';
 import 'package:funny_chat/ui/chat_content.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as Path;
 
 class ChatPage extends StatefulWidget {
   final Map map;
@@ -23,6 +28,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
   bool _loadMoreMessage = false;
   int index = 25;
   bool _showWaiting = false;
+  bool isSendingImage = false;
+  List<File> files;
+
+  /// contain images send
 
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -36,6 +45,50 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     });
   }
 
+  /// TODO choose multiple image
+
+  Future<File> _chooseImage() async {
+    await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: 50)
+        .then(
+      (value) async {
+        if (value != null) {
+          // setState(() {
+          //   isSendingImage = true;
+          // });
+
+          /// should be show image here
+
+          StorageReference storageReference = FirebaseStorage.instance
+              .ref()
+              .child('chats/${Path.basename(value.path)}');
+          StorageUploadTask uploadTask = storageReference.putFile(value);
+          await uploadTask.onComplete;
+          await storageReference.getDownloadURL().then((fileURL) {
+            log(fileURL);
+            _sendMessage(true, urlImage: "$fileURL");
+
+            /// percent is 100%
+            return fileURL;
+          });
+        }
+        return null;
+      },
+    );
+    return null;
+  }
+
+  Future<File> _takePicture() async {
+    await ImagePicker.pickImage(source: ImageSource.camera).then(
+      (value) {
+        if (value == null) {
+          return null;
+        }
+        return value;
+      },
+    );
+    return null;
+  }
+
   _addContactToListFriend() async {
     /// check user has in list friend if not add to list
     await Firestore.instance
@@ -46,7 +99,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
         .getDocuments()
         .then((value) {
       if (value.documents.length == 0) {
-        print(value.documents.length);
+        /// print(value.documents.length);
         Firestore.instance
             .collection("users")
             .document("${user.uid}")
@@ -72,13 +125,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     return sha1.convert(_roomId);
   }
 
-  _sendMessage() async {
-    if (_messageController.text.isNotEmpty) {
-      final Message _message = Message(
-          user.uid,
-          widget.map["uid"],
-          _messageController.text,
-          DateTime.now().millisecondsSinceEpoch.toString());
+  _sendMessage(bool isSendImage, {String urlImage}) async {
+    if (_messageController.text.isNotEmpty || isSendImage == true) {
+      final Message _message = !isSendImage
+          ? Message(user.uid, widget.map["uid"], _messageController.text,
+              DateTime.now().millisecondsSinceEpoch.toString(), "String")
+          : Message(user.uid, widget.map["uid"], urlImage,
+              DateTime.now().millisecondsSinceEpoch.toString(), "image");
       Firestore.instance
           .collection("conversations")
           .document("$roomId")
@@ -151,13 +204,13 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                       onNotification: (notification) {
                         if (notification is ScrollEndNotification) {
                           if (notification.metrics.pixels > 125) {
-                            debugPrint("Scroll to the top");
                             setState(() {
                               index = index + 10;
                               _loadMoreMessage = true;
                             });
                           }
                         }
+                        return;
                       },
                       child: Stack(
                         children: <Widget>[
@@ -189,22 +242,46 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
               ),
             ),
             Container(
-              height: kToolbarHeight,
               child: Row(
                 children: <Widget>[
-                  // IconButton(
-                  //   icon: const Icon(Icons.ac_unit),
-                  //   onPressed: _sendMessage,
-                  // ),
-                  IconButton(icon: Icon(Icons.camera_alt), onPressed: null),
-                  IconButton(icon: Icon(Icons.camera_alt), onPressed: null),
+                  IconButton(
+                    icon: const Icon(Icons.camera_alt),
+                    onPressed: _takePicture,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.image),
+                    onPressed: _chooseImage,
+                  ),
                   Expanded(
                     child: TextFormField(
                       controller: _messageController,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      textInputAction: TextInputAction.newline,
                       decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: BorderSide(
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          borderSide: BorderSide(
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        fillColor: Colors.grey[800],
                         filled: true,
+                        hintText: "Aa",
                       ),
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.send),
+                    onPressed: () {
+                      _sendMessage(false);
+                    },
                   ),
                 ],
               ),

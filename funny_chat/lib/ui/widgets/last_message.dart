@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class LastMessage extends StatefulWidget {
   final Map data;
@@ -18,7 +20,6 @@ class _LastMessageState extends State<LastMessage> {
   void initState() {
     super.initState();
     roomId = _gennerateRoomId();
-    debugPrint("$roomId");
   }
 
   _gennerateRoomId() {
@@ -30,7 +31,6 @@ class _LastMessageState extends State<LastMessage> {
     } else {
       _roomId = utf8.encode("${frinedId + myId}");
     }
-    //debugPrint("${sha1.convert(roomId).bytes}");
     return sha1.convert(_roomId);
   }
 
@@ -47,7 +47,11 @@ class _LastMessageState extends State<LastMessage> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data.documents.length > 0) {
-              return Text("${snapshot?.data?.documents[0]?.data["content"]}");
+              return Text(
+                "${snapshot?.data?.documents[0]?.data["content"]}",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              );
             }
             return Container();
           }

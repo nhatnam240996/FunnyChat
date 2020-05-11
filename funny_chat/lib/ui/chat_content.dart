@@ -23,22 +23,30 @@ class ChatContent extends StatelessWidget {
                       width: 64.0,
                     )
                   : const SizedBox(),
-              Flexible(
-                child: GestureDetector(
-                  onTap: null,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.lightBlue,
+              message.type == "String"
+                  ? Flexible(
+                      child: GestureDetector(
+                        onTap: null,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.lightBlue,
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Text(
+                            message.content,
+                          ),
+                        ),
+                      ),
+                    )
+                  : ClipRRect(
                       borderRadius: BorderRadius.circular(10.0),
+                      child: Image.network(
+                        message.content,
+                        height: 200,
+                      ),
                     ),
-                    child: Text(
-                      message.content,
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(
                 width: 8.0,
               ),
